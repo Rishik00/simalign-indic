@@ -1,5 +1,12 @@
-SimAlign: Similarity Based Word Aligner
+SimAlign-Indic: Similarity Based Word Aligner for indic languages (work in progress)
 ==============
+
+Notice: This is not original work, this repo is a fork from the original simalign repo (link) and paper (link). Full credits go to the authors for their incredible work, this repo was forked for experimental purposes only. Some improvements include: 
+    1. Sentence Transformers inclusion
+    2. Indic and other language encoders integration
+    3. CLI/GUI. 
+    4. A full breakdown article about the inner workings of the repo
+    5. Improving speeds
 
 <p align="center">
     <br>

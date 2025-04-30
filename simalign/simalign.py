@@ -1,7 +1,5 @@
 # coding=utf-8
-
-import os
-import logging
+import torch
 from typing import Dict, List, Tuple, Union
 
 import numpy as np
@@ -12,18 +10,40 @@ from sklearn.metrics.pairwise import cosine_similarity
 try:
 	import networkx as nx
 	from networkx.algorithms.bipartite.matrix import from_biadjacency_matrix
+
 except ImportError:
 	nx = None
-import torch
-from transformers import BertModel, BertTokenizer, XLMModel, XLMTokenizer, RobertaModel, RobertaTokenizer, XLMRobertaModel, XLMRobertaTokenizer, AutoConfig, AutoModel, AutoTokenizer
 
+from transformers import (
+	BertModel, 
+	BertTokenizer, 
+	XLMModel, 
+	XLMTokenizer, 
+	RobertaModel, 
+	RobertaTokenizer, 
+	XLMRobertaModel, 
+	XLMRobertaTokenizer, 
+	AutoConfig, 
+	AutoModel, 
+	AutoTokenizer
+)
+
+## Local imports
 from simalign.utils import get_logger
 
+## setupp logger
 LOG = get_logger(__name__)
 
-
+## Embedding loading class for loading a normal bert model
 class EmbeddingLoader(object):
-	def __init__(self, model: str="bert-base-multilingual-cased", device=torch.device('cpu'), layer: int=8):
+	def __init__(
+			self, 
+			model: str="bert-base-multilingual-cased", 
+			device=torch.device('cpu'), 
+			layer: int=8
+	):
+		
+		## This is a neat way to do shit
 		TR_Models = {
 			'bert-base-uncased': (BertModel, BertTokenizer),
 			'bert-base-multilingual-cased': (BertModel, BertTokenizer),
@@ -34,6 +54,7 @@ class EmbeddingLoader(object):
 			'xlm-roberta-large': (XLMRobertaModel, XLMRobertaTokenizer),
 		}
 
+
 		self.model = model
 		self.device = device
 		self.layer = layer
@@ -41,6 +62,7 @@ class EmbeddingLoader(object):
 		self.tokenizer = None
 
 		if model in TR_Models:
+			## if it exists in the list, then use it. Else load it using autoclasses
 			model_class, tokenizer_class = TR_Models[model]
 			self.emb_model = model_class.from_pretrained(model, output_hidden_states=True)
 			self.emb_model.eval()
@@ -65,23 +87,36 @@ class EmbeddingLoader(object):
 				hidden = self.emb_model(**inputs.to(self.device))["hidden_states"]
 				if self.layer >= len(hidden):
 					raise ValueError(f"Specified to take embeddings from layer {self.layer}, but model has only {len(hidden)} layers.")
+				
 				outputs = hidden[self.layer]
+				## I wonder why we do this all the time? 
 				return outputs[:, 1:-1, :]
 		else:
 			return None
 
 
 class SentenceAligner(object):
-	def __init__(self, model: str = "bert", token_type: str = "bpe", distortion: float = 0.0, matching_methods: str = "mai", device: str = "cpu", layer: int = 8):
+	def __init__(
+			self, 
+			model: str = "bert", 
+			token_type: str = "bpe", 
+			distortion: float = 0.0, ## why distortions? 
+			matching_methods: str = "mai", 
+			device: str = "cpu", 
+			layer: int = 8
+	):
 		model_names = {
 			"bert": "bert-base-multilingual-cased",
 			"xlmr": "xlm-roberta-base"
-			}
+		}
+		
+		## what are these? 
 		all_matching_methods = {"a": "inter", "m": "mwmf", "i": "itermax", "f": "fwd", "r": "rev"}
 
 		self.model = model
 		if model in model_names:
 			self.model = model_names[model]
+
 		self.token_type = token_type
 		self.distortion = distortion
 		self.matching_methods = [all_matching_methods[m] for m in matching_methods]

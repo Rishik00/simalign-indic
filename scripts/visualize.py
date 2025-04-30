@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from typing import List, Text, Tuple
 
-
+## What is this for? 
 def line2matrix(line: Text, n: int, m: int) -> Tuple[np.ndarray, np.ndarray]:
     '''
     converts alignemnt given in the format "0-1 3p4 5-6" to alignment matrices

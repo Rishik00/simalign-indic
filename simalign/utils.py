@@ -1,8 +1,7 @@
 import logging
 from typing import Text
-import os
 
-
+## Logger
 def get_logger(name: Text, filename: Text = None, level: int = logging.DEBUG) -> logging.Logger:
     logger = logging.getLogger(name)
     logger.setLevel(level)
